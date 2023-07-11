@@ -1,0 +1,13 @@
+# extract clock times vs acceptance rate
+let analysis_start = todatetime("2022-01-15");
+let analysis_end = todatetime("2022-02-12");
+AppEvents
+| where TimeGenerated between (analysis_start .. analysis_end)
+| where Name == "copilot/ghostText.shown" or Name == "copilot/ghostText.accepted"
+| where ClientCountryOrRegion == "United States"
+| summarize 
+  n_shown = countif(Name == "copilot/ghostText.shown"),
+  n_acc = countif(Name == "copilot/ghostText.accepted")
+  by bin(TimeGenerated, 1h)
+| extend acc_rate = todouble(n_acc) / n_shown
+
